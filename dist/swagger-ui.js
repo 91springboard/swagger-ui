@@ -21935,8 +21935,8 @@ window.SwaggerUi.utils = {};
 'use strict';
 
 window.SwaggerUi.utils = {
-    parseSecurityDefinitions: function (security) {
-        var auths = Object.assign({}, window.swaggerUi.api.authSchemes || window.swaggerUi.api.securityDefinitions);
+    parseSecurityDefinitions: function (security, securityDefinitions) {
+        var auths = Object.assign({}, securityDefinitions);
         var oauth2Arr = [];
         var authsArr = [];
         var scopes = [];
@@ -23075,9 +23075,9 @@ SwaggerUi.Views.OperationView = Backbone.View.extend({
     }
 
     if (Array.isArray(this.model.security)) {
-      var authsModel = SwaggerUi.utils.parseSecurityDefinitions(this.model.security);
+      var authsModel = SwaggerUi.utils.parseSecurityDefinitions(this.model.security, this.model.parent.securityDefinitions);
 
-      authsModel.isLogout = !_.isEmpty(window.swaggerUi.api.clientAuthorizations.authz);
+      authsModel.isLogout = !_.isEmpty(this.model.clientAuthorizations.authz);
       this.authView = new SwaggerUi.Views.AuthButtonView({
         data: authsModel,
         router: this.router,
@@ -23499,7 +23499,6 @@ SwaggerUi.Views.OperationView = Backbone.View.extend({
 
     var pre;
     var code;
-    var skipHighlight = false;
     if (!content) {
       code = $('<code />').text('no content');
       pre = $('<pre class="json" />').append(code);
@@ -23532,7 +23531,6 @@ SwaggerUi.Views.OperationView = Backbone.View.extend({
           var responseFilename = /filename=([^;]*);?/.exec(disposition);
           if(responseFilename !== null && responseFilename.length > 1) {
             download = responseFilename[1];
-            fileName = download;
           }
         }
 
@@ -23541,7 +23539,6 @@ SwaggerUi.Views.OperationView = Backbone.View.extend({
         a.innerText = 'Download ' + fileName;
 
         pre = $('<div/>').append(a);
-        skipHighlight = true;
       } else {
         pre = $('<pre class="json" />').append('Download headers detected but your browser does not support downloading binary via XHR (Blob).');
       }
@@ -23617,10 +23614,7 @@ SwaggerUi.Views.OperationView = Backbone.View.extend({
 
     var response_body_el = $('.response_body', $(this.el))[0];
     // only highlight the response if response is less than threshold, default state is highlight response
-    if (opts.highlightSizeThreshold
-          && typeof response.data !== 'undefined'
-          && response.data.length > opts.highlightSizeThreshold
-          || skipHighlight) {
+    if (opts.highlightSizeThreshold && typeof response.data !== 'undefined' && response.data.length > opts.highlightSizeThreshold) {
       return response_body_el;
     } else {
       return hljs.highlightBlock(response_body_el);
