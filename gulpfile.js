@@ -16,6 +16,8 @@ var jshint = require('gulp-jshint');
 var runSequence = require('run-sequence');
 var cssnano = require('gulp-cssnano');
 var pkg = require('./package.json');
+var sourcemaps = require('gulp-sourcemaps');
+
 
 var banner = ['/**',
   ' * <%= pkg.name %> - <%= pkg.description %>',
@@ -60,10 +62,12 @@ function _dist() {
         .src(['./src/main/template/templates.js'])
         .on('error', log)
     )
+    .pipe(sourcemaps.init({loadMaps: true}))
     .pipe(order(['scripts.js', 'templates.js']))
     .pipe(concat('swagger-ui.js'))
     .pipe(wrap('(function(){<%= contents %>}).call(this);'))
     .pipe(header(banner, { pkg: pkg }))
+    .pipe(sourcemaps.write())
     .pipe(gulp.dest('./dist'))
     .pipe(uglify())
     .on('error', log)
