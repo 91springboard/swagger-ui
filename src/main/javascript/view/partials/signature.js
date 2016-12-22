@@ -704,6 +704,18 @@ SwaggerUi.partials.signature = (function () {
 
     return result;
   };
+  
+  var getPrefix = function (name, xml) {
+    var result = name || '';
+
+    xml = xml || {};
+
+    if (xml.prefix) {
+      result = xml.prefix + ':' + result;
+    }
+
+    return result;
+  };
 
   var getNamespace = function (xml) {
     var namespace = '';
@@ -739,13 +751,11 @@ SwaggerUi.partials.signature = (function () {
     var attributes = [];
 
     if (!items) { return getErrorMessage(); }
-    
-    // To provide the name for the items from xml.name if it is provided | https://github.com/swagger-api/swagger-core/issues/2047
     var key = name;
-    if(items.xml != null && items.xml.name != null) {
+    // If there is a name specified for the array elements, use that for the array elements name | https://github.com/swagger-api/swagger-ui/issues/2577
+    if(items.xml && items.xml.name) {
         key = items.xml.name;
     }
-
     value = createSchemaXML(key, items, models, config);
 
     if (namespace) {
@@ -833,7 +843,7 @@ SwaggerUi.partials.signature = (function () {
 
     if (namespace) {
       attrs.push(namespace);
-    }
+    }   
 
     if (!properties && !additionalProperties) { return getErrorMessage(); }
 
@@ -847,10 +857,6 @@ SwaggerUi.partials.signature = (function () {
       }
 
       xml = prop.xml || {};
-      //  To provide the name for the object from xml.name if it is provided. If it is not, then it would be derived from the ref | https://github.com/swagger-api/swagger-core/issues/2047
-      if(xml != null && xml.name != null) {
-          key = xml.name;
-      }
       result = createSchemaXML(key, prop, models, config);
 
       if (xml.attribute) {
@@ -882,9 +888,10 @@ SwaggerUi.partials.signature = (function () {
     var output, index;
     config = config || {};
     config.modelsToIgnore = config.modelsToIgnore || [];
+   
     var descriptor = _.isString($ref) ? getDescriptorByRef($ref, name, models, config)
         : getDescriptor(name, definition, models, config);
-
+    
     if (!descriptor) {
       return getErrorMessage();
     }
@@ -914,10 +921,10 @@ SwaggerUi.partials.signature = (function () {
     if (arguments.length < 4) {
       throw new Error();
     }
-
     this.config = config || {};
     this.config.modelsToIgnore = this.config.modelsToIgnore || [];
-    this.name = getName(name, definition.xml);
+    // name is already set by getDescriptorByRef or getDescriptor function depending on the type. Only prefix, if present is needed to be set here | https://github.com/swagger-api/swagger-ui/issues/2577
+    this.name = getPrefix(name, definition.xml);
     this.definition = definition;
     this.models = models;
     this.type = type;
@@ -927,8 +934,15 @@ SwaggerUi.partials.signature = (function () {
     var modelType = simpleRef($ref);
     var model = models[modelType] || {};
     var type = model.definition && model.definition.type ? model.definition.type : 'object';
-    name = name || model.name;
-
+    // If model definition xml name is present, then that will be preferred over model name. This is the case of preferring XmlElement name over XmlRootElement name if XmlElement name is provided | https://github.com/swagger-api/swagger-ui/issues/2577
+    if(model.definition.xml && model.definition.xml.name) {
+        name = name || model.definition.xml.name || model.name;
+    }
+    // else only model name will be considered for determination | https://github.com/swagger-api/swagger-ui/issues/2577
+    else {
+        name = name || model.name;
+    }
+    
     if (config.modelsToIgnore.indexOf($ref) > -1) {
       type = 'loop';
       config.loopTo = modelType;
@@ -939,13 +953,15 @@ SwaggerUi.partials.signature = (function () {
     if (!model.definition) {
       return null;
     }
-
-    return new Descriptor(name, type, model.definition, models, config);
+    return new Descriptor(name, type, model.definition, models, config);    
   }
 
   function getDescriptor (name, definition, models, config){
     var type = definition.type || 'object';
-
+    // If definition xml name is present, then that will be preferred over name | https://github.com/swagger-api/swagger-ui/issues/2577
+    if(definition.xml && definition.xml.name) {
+        name = definition.xml.name || name;
+    }
     if (!definition) {
       return null;
     }
