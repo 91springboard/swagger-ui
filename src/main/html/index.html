@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="x-ua-compatible" content="IE=edge">
-  <title>Swagger UI</title>
+  <title>91springboard API Documentation</title>
   <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32" />
   <link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16" />
   <link href='css/typography.css' media='screen' rel='stylesheet' type='text/css'/>
   <link href='css/reset.css' media='screen' rel='stylesheet' type='text/css'/>
   <link href='css/screen.css' media='screen' rel='stylesheet' type='text/css'/>
+  <link href='css/mystyle.css' media='screen' rel='stylesheet' type='text/css'/>
   <link href='css/reset.css' media='print' rel='stylesheet' type='text/css'/>
   <link href='css/print.css' media='print' rel='stylesheet' type='text/css'/>
 
@@ -38,7 +39,7 @@
       if (url && url.length > 1) {
         url = decodeURIComponent(url[1]);
       } else {
-        url = "http://dev.api.91springboard.com/v1/docs/swagger.json";
+        url = '';
       }
 
       hljs.configure({
@@ -95,7 +96,7 @@
 <body class="swagger-section">
 <div id='header'>
   <div class="swagger-ui-wrap">
-    <a id="logo" href="http://docs.91springboard.com">
+    <a id="logo" href="#">
       <img class="logo__img" alt="swagger" height="40" width="45" src="images/new_logo.png" />
       <span class="logo__title">91springboard</span>
     </a>
