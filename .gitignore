@@ -4,8 +4,3 @@ node_modules
 .DS_Store
 npm-debug.log*
 .eslintcache
-.project
-/nbproject/private/
-dist/specs/
-test/specs/local/
-dist
